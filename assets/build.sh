@@ -1,27 +1,39 @@
 #!/bin/bash
 set -e
 
-echo "=== BUILDING MICROPYTHON FIRMWARE FOR PICO (W and 2W)==="
+# Usage:
+# docker run --rm -v $(pwd)/firmware:/firmware ghcr.io/lighta/micropython-picow-builder RPI_PICO_W
+# or:
+# docker run --rm -v $(pwd)/firmware:/firmware ghcr.io/lighta/micropython-picow-builder RPI_PICO2_W
+
+BOARD="$1"
+
+if [ -z "$BOARD" ]; then
+    echo "Usage: $0 <BOARD>"
+    echo "Example boards: RPI_PICO_W or RPI_PICO2_W"
+    exit 1
+fi
+
+echo "=== BUILDING MICROPYTHON FIRMWARE FOR BOARD: $BOARD ==="
 
 # Paths
-cd /opt/MicroPython/ports/rp2
+cd /opt/micropython/ports/rp2
 
 # Copy user modules if provided
 if [ -d /module ]; then
-    echo "===> Copying user main.py to modules/"
+    echo "===> Copying user *.py to modules/"
     mkdir -p modules
-    cp /module/*.py modules/
+    cp /module/*.py modules/ || true
 fi
 
-# Build firmware2
-#building for pico1
-make BOARD=RPI_PICO_W -j$(nproc)
-cp /opt/MicroPython/ports/rp2/build-RPI_PICO_W/firmware.uf2 /firmware/firmware_picoW_$(date +%Y%m%d_%H%M%S).uf2
+# Build firmware
+echo "===> Running make for $BOARD"
+make BOARD="$BOARD" -j$(nproc)
 
-#building for pico2
-make BOARD=RPI_PICO2_W -j$(nproc)
-cp /opt/MicroPython/ports/rp2/build-RPI_PICO_W/firmware.uf2 /firmware/firmware_pico2W_$(date +%Y%m%d_%H%M%S).uf2
+# Copy firmware
+mkdir -p /firmware
+cp "/opt/micropython/ports/rp2/build-${BOARD}/firmware.uf2" "/firmware/firmware_${BOARD}_$(date +%Y%m%d_%H%M%S).uf2"
 
-echo "=== Build completed ==="
-echo "UF2 files located at:"
-echo "firmware/*.uf2"
+echo "=== Build completed for $BOARD ==="
+echo "UF2 file created:"
+ls -lh /firmware/*.uf2
