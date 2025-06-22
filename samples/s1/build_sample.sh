@@ -8,6 +8,6 @@ echo "=== Result should be in /firmware folder ==="
 
 cd ../..
 cp samples/s1/module/* ./module/.
-./build_uf2.sh
+./main.sh --board ALL
 
 echo "=== Done sample generation ==="

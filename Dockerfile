@@ -19,7 +19,7 @@ WORKDIR /opt/micropython
 
 RUN make -C mpy-cross
 RUN make -C ports/rp2 submodules BOARD=RPI_PICO_W
-RUN make -C ports/rp2 submodules BOARD= RPI_PICO2_W
+RUN make -C ports/rp2 submodules BOARD=RPI_PICO2_W
 
 
 # Create volume mount point
